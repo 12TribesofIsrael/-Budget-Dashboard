@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tommy's Budget Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2128;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --green: #3fb950;
+      --green-bg: #1b2a1e;
+      --red: #f85149;
+      --red-bg: #2d1117;
+      --orange: #d29922;
+      --orange-bg: #271f08;
+      --blue: #58a6ff;
+      --blue-bg: #0d1f30;
+      --gray: #6e7681;
+      --gray-bg: #1c2128;
+      --purple: #a371f7;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 13px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-title { font-size: 17px; font-weight: 700; }
+    .header-month { font-size: 13px; color: var(--muted); }
+    .header-right { display: flex; gap: 8px; align-items: center; }
+
+    .btn {
+      padding: 6px 13px; border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface2); color: var(--text);
+      cursor: pointer; font-size: 12px; font-weight: 500;
+      transition: background .15s;
+    }
+    .btn:hover { background: #2d333b; }
+    .btn-danger  { background: var(--red-bg);    border-color: var(--red);    color: var(--red); }
+    .btn-danger:hover  { background: #3d1a1a; }
+    .btn-primary { background: var(--blue-bg);   border-color: var(--blue);   color: var(--blue); }
+    .btn-primary:hover { background: #1a3a5c; }
+    .btn-edit-on { background: rgba(163,113,247,.15); border-color: var(--purple); color: var(--purple); }
+    .btn-edit-on:hover { background: rgba(163,113,247,.25); }
+
+    /* ── LAYOUT ── */
+    .main { max-width: 1100px; margin: 0 auto; padding: 18px 24px; }
+
+    /* ── ALERTS ── */
+    .alerts { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .alert-card { background: var(--red-bg); border: 1px solid var(--red); border-radius: 8px; padding: 11px 15px; flex: 1; min-width: 170px; }
+    .alert-card.warn { background: var(--orange-bg); border-color: var(--orange); }
+    .alert-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--red); margin-bottom: 3px; }
+    .alert-card.warn .alert-label { color: var(--orange); }
+    .alert-body { font-size: 14px; font-weight: 700; }
+    .alert-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── STATS ROW ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+    @media(max-width:680px){ .stats-row { grid-template-columns: repeat(2,1fr); } }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 13px 15px; }
+    .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 5px; }
+    .stat-value { font-size: 21px; font-weight: 700; line-height: 1; }
+    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 5px; }
+    .c-green { color: var(--green); } .c-red { color: var(--red); }
+    .c-blue  { color: var(--blue);  } .c-orange { color: var(--orange); }
+
+    .progress-bar { background: var(--border); border-radius: 4px; height: 5px; margin-top: 7px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width .4s; }
+
+    /* ── SECTIONS ── */
+    .section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+    .sec-header { display: flex; align-items: center; justify-content: space-between; padding: 11px 15px; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); }
+    .sec-header:hover { background: var(--surface2); }
+    .sec-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+    .sec-badge { font-size: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 1px 7px; color: var(--muted); font-weight: 600; }
+    .sec-right { display: flex; align-items: center; gap: 10px; }
+    .sec-amount { font-size: 13px; font-weight: 700; }
+    .chevron { color: var(--muted); transition: transform .2s; display: inline-block; }
+    .chevron.open { transform: rotate(180deg); }
+    .sec-body.collapsed { display: none; }
+
+    /* ── BILL ROW ── */
+    .bill-row {
+      display: flex; align-items: center;
+      padding: 9px 15px; border-bottom: 1px solid var(--border);
+      gap: 10px; cursor: pointer; transition: background .1s;
+    }
+    .bill-row:last-child { border-bottom: none; }
+    .bill-row:hover { background: var(--surface2); }
+    .bill-row.is-paid { opacity: .5; }
+    .bill-row.is-hold { opacity: .4; cursor: default; }
+    .bill-row.no-click { cursor: default; }
+    .bill-name { flex: 1; font-size: 13px; font-weight: 500; }
+    .bill-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .bill-due { font-size: 11px; color: var(--muted); min-width: 90px; text-align: right; }
+    .bill-amount { font-size: 13px; font-weight: 700; min-width: 68px; text-align: right; }
+
+    /* ── EDIT ICON ── */
+    .edit-icon {
+      width: 26px; height: 26px; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--muted); font-size: 13px;
+      border: 1px solid transparent;
+      transition: all .15s; flex-shrink: 0;
+    }
+    .edit-icon:hover { background: var(--surface2); border-color: var(--border); color: var(--purple); }
+
+    /* Add row button */
+    .add-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 15px; color: var(--muted); font-size: 12px;
+      cursor: pointer; border-top: 1px dashed var(--border);
+      transition: background .1s, color .1s;
+    }
+    .add-row:hover { background: var(--surface2); color: var(--blue); }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 10px; font-weight: 700; letter-spacing: .04em;
+      min-width: 78px; justify-content: center;
+      white-space: nowrap; user-select: none;
+      transition: transform .1s, opacity .15s;
+    }
+    .badge:not(.locked):hover { opacity: .75; }
+    .badge:not(.locked):active { transform: scale(.93); }
+    .badge-paid   { background: var(--green-bg);   color: var(--green);  border: 1px solid rgba(63,185,80,.35); }
+    .badge-due    { background: var(--red-bg);      color: var(--red);    border: 1px solid rgba(248,81,73,.4); }
+    .badge-hold   { background: var(--gray-bg);     color: var(--gray);   border: 1px solid var(--border); cursor: default; }
+    .badge-income { background: rgba(63,185,80,.1); color: var(--green);  border: 1px solid rgba(63,185,80,.2); cursor: default; }
+
+    /* ── UPCOMING ── */
+    .upcoming-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 10px; padding: 13px; }
+    .up-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 11px; cursor: pointer; transition: background .1s; }
+    .up-card:hover { background: #23292f; }
+    .up-card.urgent { border-color: rgba(248,81,73,.5); }
+    .up-card.paid   { border-color: rgba(63,185,80,.4); opacity: .6; }
+    .up-date { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 3px; }
+    .up-name { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+    .up-amount { font-size: 17px; font-weight: 800; }
+    .up-amount.urgent { color: var(--red); }
+    .up-amount.paid   { color: var(--green); }
+    .no-upcoming { padding: 20px; text-align: center; color: var(--muted); font-size: 13px; }
+
+    /* ── ACCOUNTS ── */
+    .accounts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px,1fr)); gap: 10px; padding: 13px; }
+    .acc-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 11px; }
+    .acc-name { font-size: 10px; color: var(--muted); font-weight: 600; margin-bottom: 5px; }
+    .acc-balance { font-size: 16px; font-weight: 800; }
+    .acc-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+    /* ── SUMMARY ── */
+    .summary { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 17px 20px; margin-bottom: 10px; }
+    .sum-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 13px; }
+    .sum-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .sum-item { text-align: center; }
+    .sum-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .sum-val { font-size: 25px; font-weight: 800; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.7); z-index: 500;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; width: 100%; max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 15px 18px; border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-size: 15px; font-weight: 700; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 4px; }
+    .modal-close:hover { background: var(--surface2); color: var(--text); }
+    .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 13px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .field input, .field select {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 11px;
+      color: var(--text); font-size: 13px;
+      transition: border-color .15s; width: 100%;
+    }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--blue); }
+    .field select option { background: var(--surface2); }
+    .field-hint { font-size: 11px; color: var(--muted); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-footer {
+      display: flex; align-items: center; gap: 8px;
+      padding: 13px 18px; border-top: 1px solid var(--border);
+    }
+    .modal-footer .spacer { flex: 1; }
+    .modal-type-toggle { display: flex; gap: 6px; align-items: center; }
+    .toggle-pill {
+      padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      border: 1px solid var(--border); background: var(--surface2); color: var(--muted);
+      cursor: pointer; transition: all .15s;
+    }
+    .toggle-pill.active { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+    .toggle-pill.active-green { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 20px; right: 20px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 15px;
+      font-size: 13px; font-weight: 500;
+      display: none; z-index: 999;
+      animation: slideUp .2s ease;
+    }
+    .toast.show { display: flex; align-items: center; gap: 6px; }
+    @keyframes slideUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+    .footer { text-align: center; padding: 16px; color: var(--muted); font-size: 11px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <div class="header-left">
+    <span class="header-title">💰 Budget Dashboard</span>
+    <span class="header-month" id="header-month"></span>
+  </div>
+  <div class="header-right">
+    <button class="btn" onclick="toggleInactive()" id="btn-inactive">Show Inactive</button>
+    <button class="btn" id="btn-edit" onclick="toggleEditMode()">✏️ Edit</button>
+    <button class="btn btn-danger" onclick="resetMonth()">↺ Reset Month</button>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+  <div id="alerts"></div>
+  <div class="stats-row" id="stats-row"></div>
+
+  <div class="section">
+    <div class="sec-header" onclick="toggleSection('upcoming')">
+      <div class="sec-title">📅 Due This Week <span class="sec-badge" id="ct-upcoming">0</span></div>
+      <span class="chevron open" id="chev-upcoming">▼</span>
+    </div>
+    <div class="sec-body" id="body-upcoming">
+      <div class="upcoming-grid" id="upcoming-grid"></div>
+    </div>
+  </div>
+
+  <div id="bill-sections"></div>
+
+  <div class="section">
+    <div class="sec-header" onclick="toggleSection('accounts')">
+      <div class="sec-title">🏦 Account Snapshot <span class="sec-badge">as of 2/20/26</span></div>
+      <span class="chevron open" id="chev-accounts">▼</span>
+    </div>
+    <div class="sec-body" id="body-accounts">
+      <div class="accounts-grid" id="accounts-grid"></div>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+  <div class="footer">Click any bill row to mark paid · ✏️ Edit to customize · Saves automatically</div>
+</div>
+
+<!-- ═══ EDIT MODAL ═══ -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Edit Bill</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field" style="grid-column:1/-1">
+          <label>Name</label>
+          <input type="text" id="f-name" placeholder="e.g. Netflix">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Amount ($/mo)</label>
+          <input type="number" id="f-amount" step="0.01" min="0" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <select id="f-cat">
+            <option value="MANDATORY">🏠 MANDATORY</option>
+            <option value="SYSTEM">💻 SYSTEM</option>
+            <option value="MISC">🎯 MISC</option>
+            <option value="MARNAYSHA">👪 MARNAYSHA</option>
+            <option value="INVESTMENTS">📈 INVESTMENTS</option>
+            <option value="INCOME">💚 INCOME</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row" id="expense-fields">
+        <div class="field">
+          <label>Due Date</label>
+          <input type="text" id="f-dueday" placeholder="e.g. 15  or  1,15  or  biweekly">
+          <span class="field-hint">Day of month, two days separated by comma, or "biweekly"</span>
+        </div>
+        <div class="field">
+          <label>Payment Method</label>
+          <input type="text" id="f-pay" placeholder="e.g. DCU Checking">
+        </div>
+      </div>
+      <div class="field" id="income-note-field" style="display:none">
+        <label>Note / Frequency</label>
+        <input type="text" id="f-note" placeholder="e.g. Every 2 weeks, 15th monthly">
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="f-status">
+          <option value="due">! DUE — needs to be paid this month</option>
+          <option value="paid">✓ PAID — confirmed done</option>
+          <option value="hold">⏸ ON HOLD — inactive / paused</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="btn-delete" onclick="deleteCurrent()">🗑 Delete</button>
+      <div class="spacer"></div>
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCurrent()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════
+// DEFAULT DATA
+// ════════════════════════════════════════════════════
+
+const DEFAULT_BILLS = [
+  // ── MANDATORY ─────────────────────────────────
+  { id:'mortgage',        name:'Mortgage',              cat:'MANDATORY',   amount:2625.54, dueDay:16,         pay:'DCU Checking' },
+  { id:'cell_phone',      name:'Cell Phone',            cat:'MANDATORY',   amount:155,     dueDay:20,         pay:'DCU Checking' },
+  { id:'car_note_dcu',    name:'Car Note (DCU)',         cat:'MANDATORY',   amount:475,     dueDay:4,          pay:'DCU Checking' },
+  { id:'car_note_nihfcu', name:'Car Note (NIHFCU)',      cat:'MANDATORY',   amount:202,     dueDay:13,         pay:'NIHFCU Checking' },
+  { id:'car_insurance',   name:'Car Insurance',         cat:'MANDATORY',   amount:293,     dueDay:26,         pay:'DCU CC' },
+  { id:'dcu_cc',          name:'DCU CC (min pmt)',       cat:'MANDATORY',   amount:221,     dueDay:5,          pay:'DCU Checking' },
+  { id:'truist_cc_2756',  name:'Truist CC (...2756)',    cat:'MANDATORY',   amount:27,      dueDay:21,         pay:'Truist Checking' },
+  { id:'truist_cc_3345',  name:'Truist CC (...3345)',    cat:'MANDATORY',   amount:135,     dueDay:24,         pay:'Truist Checking' },
+  { id:'dover_cc',        name:'Dover CC (min pmt)',     cat:'MANDATORY',   amount:27,      dueDay:22,         pay:'Truist Checking' },
+  { id:'langley_cc',      name:'Langley CC (min pmt)',  cat:'MANDATORY',   amount:199,     dueDay:19,         pay:'DCU Checking' },
+  { id:'nihfcu_cc',       name:'NIHFCU CC',              cat:'MANDATORY',   amount:25,      dueDay:20,         pay:'NIHFCU Checking' },
+  { id:'dcu_loan',        name:'DCU Personal Loan',     cat:'MANDATORY',   amount:182,     dueDay:19,         pay:'DCU Checking' },
+  { id:'taxes_federal',   name:'Federal Taxes',         cat:'MANDATORY',   amount:250,     dueDay:28,         pay:'DCU' },
+  { id:'taxes_state',     name:'State Taxes',           cat:'MANDATORY',   amount:125,     dueDay:29,         pay:'DCU' },
+  { id:'boxing',          name:'Thomas Boxing',         cat:'MANDATORY',   amount:125,     dueDay:20,         pay:'' },
+  { id:'gas_car',         name:'Gas (Car)',              cat:'MANDATORY',   amount:100,     dueDay:null,       pay:'' },
+  // ── SYSTEM ────────────────────────────────────
+  { id:'shopify',         name:'Shopify',               cat:'SYSTEM',      amount:9,       dueDay:24,         pay:'Langley' },
+  { id:'godaddy',         name:'GoDaddy',               cat:'SYSTEM',      amount:8.99,    dueDay:13,         pay:'DCU CC' },
+  { id:'chatgpt',         name:'Sora / ChatGPT',        cat:'SYSTEM',      amount:20,      dueDay:null,       pay:'' },
+  { id:'claude_ai',       name:'Claude AI',             cat:'SYSTEM',      amount:20,      dueDay:null,       pay:'' },
+  { id:'google_drive',    name:'Google Drive',          cat:'SYSTEM',      amount:10,      dueDay:6,          pay:'' },
+  { id:'mentorship',      name:'Mentorship Joe',        cat:'SYSTEM',      amount:25,      dueDay:30,         pay:'' },
+  { id:'midjourney',      name:'Midjourney',            cat:'SYSTEM',      amount:11,      dueDay:null,       pay:'', hold:true },
+  { id:'elevenlabs',      name:'11Labs',                cat:'SYSTEM',      amount:0,       dueDay:null,       pay:'', hold:true },
+  { id:'cursor',          name:'Cursor',                cat:'SYSTEM',      amount:20,      dueDay:null,       pay:'', hold:true },
+  { id:'canva',           name:'Canva',                 cat:'SYSTEM',      amount:0,       dueDay:null,       pay:'', hold:true },
+  // ── MISC ──────────────────────────────────────
+  { id:'ymca',            name:'YMCA',                  cat:'MISC',        amount:55,      dueDay:9,          pay:'DCU Checking' },
+  { id:'timeshare',       name:'Time Share',            cat:'MISC',        amount:115,     dueDay:22,         pay:'NIHFCU CC' },
+  { id:'son_haircut',     name:"Son's Haircut",         cat:'MISC',        amount:40,      dueDay:'biweekly', pay:'Cash App' },
+  { id:'post_office',     name:'Post Office Box',       cat:'MISC',        amount:6,       dueDay:null,       pay:'' },
+  { id:'gamepass',        name:'GamePass',              cat:'MISC',        amount:30,      dueDay:17,         pay:'', hold:true },
+  // ── MARNAYSHA ─────────────────────────────────
+  { id:'mar_cell',        name:'Marnaysha — Cell',      cat:'MARNAYSHA',   amount:75,      dueDay:null,       pay:'' },
+  { id:'mar_rent',        name:'Marnaysha — Rent',      cat:'MARNAYSHA',   amount:150,     dueDay:null,       pay:'' },
+  { id:'mar_food',        name:'Marnaysha — Food',      cat:'MARNAYSHA',   amount:50,      dueDay:null,       pay:'' },
+  // ── INVESTMENTS ───────────────────────────────
+  { id:'bitcoin',         name:'Bitcoin (Coinbase)',    cat:'INVESTMENTS', amount:200,     dueDay:[1,15],     pay:'DCU Checking' },
+  { id:'eth',             name:'Ethereum (Coinbase)',   cat:'INVESTMENTS', amount:200,     dueDay:[1,15],     pay:'DCU Checking' },
+  // ── INCOME ────────────────────────────────────
+  { id:'bayhealth',       name:'BayHealth Paycheck',    cat:'INCOME',      amount:4000,    dueDay:'biweekly', pay:'', note:'Every 2 weeks' },
+  { id:'aliya',           name:'Aliya (Client)',         cat:'INCOME',      amount:0,       dueDay:15,         pay:'', note:'15th — variable' },
+  { id:'jay',             name:'Jay (Client)',           cat:'INCOME',      amount:100,     dueDay:15,         pay:'', note:'15th monthly' },
+  { id:'turo',            name:'Turo Rental',           cat:'INCOME',      amount:200,     dueDay:null,       pay:'', note:'Monthly' },
+];
+
+const ACCOUNTS = [
+  { name:'DCU Checking',    balance:6881.85,  type:'checking' },
+  { name:'Wells Fargo',     balance:1494.59,  type:'checking' },
+  { name:'Truist Business', balance:619.88,   type:'checking' },
+  { name:'Truist Checking', balance:284.01,   type:'checking' },
+  { name:'NIHFCU Checking', balance:496.16,   type:'checking' },
+  { name:'Cash App',        balance:390,      type:'cash' },
+  { name:'DCU Savings',     balance:1016.26,  type:'savings' },
+  { name:'Crypto',          balance:999.29,   type:'crypto' },
+  { name:'DCU CC',     limit:20000, used:12508.31, available:7491.69,  type:'cc' },
+  { name:'Truist CC',  limit:4900,  used:4935.21,  available:-35.21,   type:'cc' },
+  { name:'Langley CC', limit:10000, used:9988.74,  available:11.26,    type:'cc' },
+  { name:'NIHFCU CC',  limit:2000,  used:1392,     available:608,      type:'cc' },
+];
+
+const CAT_ORDER = ['MANDATORY','SYSTEM','MISC','MARNAYSHA','INVESTMENTS'];
+const CAT_ICONS = { MANDATORY:'🏠', SYSTEM:'💻', MISC:'🎯', MARNAYSHA:'👪', INVESTMENTS:'📈', INCOME:'💚' };
+
+// ════════════════════════════════════════════════════
+// DATA PERSISTENCE
+// ════════════════════════════════════════════════════
+
+function loadData() {
+  try {
+    const v = localStorage.getItem('budget_bills_v3');
+    if (v) return JSON.parse(v);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_BILLS)); // deep copy
+}
+
+function saveData() {
+  localStorage.setItem('budget_bills_v3', JSON.stringify(DATA));
+}
+
+let DATA = loadData();
+
+// ════════════════════════════════════════════════════
+// MONTHLY STATUS STATE
+// ════════════════════════════════════════════════════
+
+function monthKey() {
+  const d = new Date();
+  return `budget_state_v2_${d.getFullYear()}_${d.getMonth()+1}`;
+}
+
+function loadState() {
+  try { const v = localStorage.getItem(monthKey()); if(v) return JSON.parse(v); } catch(e) {}
+  return {};
+}
+
+function saveState() { localStorage.setItem(monthKey(), JSON.stringify(state)); }
+
+function getStatus(id) {
+  if (state[id] !== undefined) return state[id];
+  const bill = DATA.find(b => b.id === id);
+  return (bill && bill.hold) ? 'hold' : 'due';
+}
+
+let state = loadState();
+let showInactive = false;
+let editMode = false;
+let collapsed = {};
+
+// ════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════
+
+function fmt(n) { if (!n) return '$0.00'; return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+function ord(n) { const s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+
+function dueDayLabel(d) {
+  if (!d && d !== 0) return 'No fixed date';
+  if (d === 'biweekly') return 'Every 2 weeks';
+  if (Array.isArray(d)) return d.map(ord).join(' & ') + ' of month';
+  return ord(d) + ' of month';
+}
+
+function dueDayStr(d) {
+  if (!d && d !== 0) return '';
+  if (d === 'biweekly') return 'biweekly';
+  if (Array.isArray(d)) return d.join(', ');
+  return String(d);
+}
+
+function parseDueDay(s) {
+  if (!s || !s.trim()) return null;
+  const t = s.trim().toLowerCase();
+  if (t === 'biweekly') return 'biweekly';
+  const parts = t.split(',').map(x => parseInt(x.trim())).filter(n => !isNaN(n));
+  if (parts.length === 0) return null;
+  if (parts.length === 1) return parts[0];
+  return parts;
+}
+
+function generateId() {
+  return 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+}
+
+function upcomingBills() {
+  const today = new Date().getDate();
+  const result = [];
+  DATA.filter(b => b.cat !== 'INCOME').forEach(b => {
+    const s = getStatus(b.id);
+    if (s === 'hold') return;
+    if (!b.dueDay || b.dueDay === 'biweekly') return;
+    const days = Array.isArray(b.dueDay) ? b.dueDay : [b.dueDay];
+    days.forEach(d => {
+      if (d >= today && d <= today + 7) result.push({ ...b, exactDay: d });
+    });
+  });
+  return result.sort((a,b) => a.exactDay - b.exactDay);
+}
+
+function dayLabel(day) {
+  const d = new Date(); d.setDate(day);
+  return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+}
+
+// ════════════════════════════════════════════════════
+// MODAL STATE
+// ════════════════════════════════════════════════════
+
+let currentId = null; // null = new item
+
+function openModal(id) {
+  currentId = id;
+  const bill = id ? DATA.find(b => b.id === id) : null;
+  const isNew = !bill;
+
+  document.getElementById('modal-title').textContent = isNew ? 'Add Bill or Income' : 'Edit — ' + (bill.name || '');
+  document.getElementById('btn-delete').style.display = isNew ? 'none' : '';
+
+  document.getElementById('f-name').value    = bill ? bill.name   : '';
+  document.getElementById('f-amount').value  = bill ? (bill.amount || '') : '';
+  document.getElementById('f-cat').value     = bill ? bill.cat    : 'MANDATORY';
+  document.getElementById('f-dueday').value  = bill ? dueDayStr(bill.dueDay) : '';
+  document.getElementById('f-pay').value     = bill ? (bill.pay  || '') : '';
+  document.getElementById('f-note').value    = bill ? (bill.note || '') : '';
+  document.getElementById('f-status').value  = bill ? getStatus(id) : 'due';
+
+  updateModalFields(); // show/hide income-specific fields
+
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('f-name').focus();
+}
+
+function updateModalFields() {
+  const cat = document.getElementById('f-cat').value;
+  const isIncome = cat === 'INCOME';
+  document.getElementById('expense-fields').style.display   = isIncome ? 'none' : '';
+  document.getElementById('income-note-field').style.display = isIncome ? '' : 'none';
+}
+
+// bind category change
+document.getElementById('f-cat').addEventListener('change', updateModalFields);
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  currentId = null;
+}
+
+function saveCurrent() {
+  const name   = document.getElementById('f-name').value.trim();
+  const amount = parseFloat(document.getElementById('f-amount').value) || 0;
+  const cat    = document.getElementById('f-cat').value;
+  const dueDay = parseDueDay(document.getElementById('f-dueday').value);
+  const pay    = document.getElementById('f-pay').value.trim();
+  const note   = document.getElementById('f-note').value.trim();
+  const status = document.getElementById('f-status').value;
+
+  if (!name) { document.getElementById('f-name').focus(); return; }
+
+  if (currentId) {
+    // Update existing
+    const idx = DATA.findIndex(b => b.id === currentId);
+    if (idx !== -1) {
+      DATA[idx] = { ...DATA[idx], name, amount, cat, dueDay, pay, note };
+      DATA[idx].hold = (status === 'hold');
+    }
+    state[currentId] = status;
+    toast('✅ Saved — ' + name);
+  } else {
+    // Create new
+    const id = generateId();
+    DATA.push({ id, name, amount, cat, dueDay, pay, note, hold: status === 'hold' });
+    state[id] = status;
+    toast('✅ Added — ' + name);
+  }
+
+  saveData(); saveState(); closeModal(); render();
+}
+
+function deleteCurrent() {
+  if (!currentId) return;
+  const bill = DATA.find(b => b.id === currentId);
+  if (!confirm(`Delete "${bill ? bill.name : 'this item'}"? This cannot be undone.`)) return;
+  DATA = DATA.filter(b => b.id !== currentId);
+  delete state[currentId];
+  saveData(); saveState(); closeModal(); render();
+  toast('🗑 Deleted');
+}
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+
+// ════════════════════════════════════════════════════
+// ACTIONS
+// ════════════════════════════════════════════════════
+
+function toggleStatus(id) {
+  if (editMode) { openModal(id); return; }
+  const bill = DATA.find(b => b.id === id);
+  if (!bill || getStatus(id) === 'hold') return;
+  if (getStatus(id) === 'due') {
+    state[id] = 'paid';
+    toast('✅ Marked paid — ' + bill.name);
+  } else {
+    state[id] = 'due';
+    toast('↩ Unmarked — ' + bill.name);
+  }
+  saveState(); render();
+}
+
+function resetMonth() {
+  const label = new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  if (!confirm(`Reset all statuses for ${label}?\n\nEverything will go back to DUE.`)) return;
+  state = {};
+  saveState(); render();
+  toast('🔄 Month reset — all bills marked DUE');
+}
+
+function toggleInactive() {
+  showInactive = !showInactive;
+  document.getElementById('btn-inactive').textContent = showInactive ? 'Hide Inactive' : 'Show Inactive';
+  render();
+}
+
+function toggleEditMode() {
+  editMode = !editMode;
+  const btn = document.getElementById('btn-edit');
+  btn.textContent = editMode ? '✅ Done Editing' : '✏️ Edit';
+  btn.className   = editMode ? 'btn btn-edit-on' : 'btn';
+  render();
+  if (editMode) toast('Edit mode ON — click any row or ✏️ to edit');
+}
+
+function toggleSection(id) {
+  collapsed[id] = !collapsed[id];
+  const body = document.getElementById('body-'+id);
+  const chev = document.getElementById('chev-'+id);
+  if (body) body.classList.toggle('collapsed', !!collapsed[id]);
+  if (chev) chev.classList.toggle('open', !collapsed[id]);
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+// ════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════
+
+function render() {
+  renderHeader();
+  renderAlerts();
+  renderStats();
+  renderUpcoming();
+  renderBillSections();
+  renderAccounts();
+  renderSummary();
+}
+
+function renderHeader() {
+  const label = new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  document.getElementById('header-month').textContent = '· ' + label;
+}
+
+function renderAlerts() {
+  const cards = [];
+
+  ACCOUNTS.filter(a => a.type==='cc' && a.available < 0).forEach(a => {
+    cards.push(`<div class="alert-card">
+      <div class="alert-label">🚨 Over Credit Limit</div>
+      <div class="alert-body">${a.name}</div>
+      <div class="alert-sub">Over by ${fmt(Math.abs(a.available))} &nbsp;·&nbsp; Limit ${fmt(a.limit)}</div>
+    </div>`);
+  });
+
+  ACCOUNTS.filter(a => a.type==='cc' && a.available >= 0 && a.available < 100).forEach(a => {
+    cards.push(`<div class="alert-card warn">
+      <div class="alert-label">⚠️ Near Credit Limit</div>
+      <div class="alert-body">${a.name}</div>
+      <div class="alert-sub">Only ${fmt(a.available)} left &nbsp;·&nbsp; Limit ${fmt(a.limit)}</div>
+    </div>`);
+  });
+
+  const today = new Date().getDate();
+  const overdue = DATA.filter(b => {
+    if (b.cat === 'INCOME') return false;
+    if (getStatus(b.id) !== 'due') return false;
+    if (!b.dueDay || b.dueDay === 'biweekly' || Array.isArray(b.dueDay)) return false;
+    return b.dueDay < today;
+  });
+  if (overdue.length) {
+    cards.push(`<div class="alert-card">
+      <div class="alert-label">⏰ Past Due Date — Not Marked Paid</div>
+      <div class="alert-body">${overdue.length} bill${overdue.length>1?'s':''}</div>
+      <div class="alert-sub">${overdue.map(b=>b.name).join(' · ')}</div>
+    </div>`);
+  }
+
+  document.getElementById('alerts').innerHTML =
+    cards.length ? `<div class="alerts">${cards.join('')}</div>` : '';
+}
+
+function renderStats() {
+  const expenses = DATA.filter(b => b.cat !== 'INCOME');
+  const active   = expenses.filter(b => getStatus(b.id) !== 'hold');
+  const paid     = active.filter(b => getStatus(b.id) === 'paid');
+  const paidAmt  = paid.reduce((s,b) => s+b.amount, 0);
+  const totalAmt = active.reduce((s,b) => s+b.amount, 0);
+  const pct = active.length ? Math.round(paid.length/active.length*100) : 0;
+
+  const totalIncome = DATA.filter(b => b.cat === 'INCOME').reduce((s,b) => s+b.amount, 0);
+  const netMonthly  = totalIncome - totalAmt;
+  const netCls      = netMonthly >= 0 ? 'c-green' : 'c-red';
+  const netSign     = netMonthly >= 0 ? '+' : '';
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Bills Confirmed</div>
+      <div class="stat-value ${paid.length===active.length?'c-green':'c-blue'}">${paid.length} / ${active.length}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="stat-sub">${pct}% complete this month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Paid So Far</div>
+      <div class="stat-value c-green">${fmt(paidAmt)}</div>
+      <div class="stat-sub">of ${fmt(totalAmt)} total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Still Outstanding</div>
+      <div class="stat-value ${totalAmt-paidAmt>0?'c-red':'c-green'}">${fmt(totalAmt-paidAmt)}</div>
+      <div class="stat-sub">left to verify</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Monthly Net</div>
+      <div class="stat-value ${netCls}">${netSign}${fmt(Math.abs(netMonthly)).replace('$',netMonthly<0?'−$':'$')}</div>
+      <div class="stat-sub">${fmt(totalIncome)} in · ${fmt(totalAmt)} out</div>
+    </div>`;
+}
+
+function renderUpcoming() {
+  const upcoming = upcomingBills();
+  document.getElementById('ct-upcoming').textContent = upcoming.length;
+  const grid = document.getElementById('upcoming-grid');
+
+  if (!upcoming.length) {
+    grid.innerHTML = '<div class="no-upcoming">🎉 No bills due in the next 7 days</div>';
+    return;
+  }
+
+  grid.innerHTML = upcoming.map(b => {
+    const s   = getStatus(b.id);
+    const cls = s === 'paid' ? 'paid' : 'urgent';
+    return `<div class="up-card ${cls}" onclick="toggleStatus('${b.id}')">
+      <div class="up-date">${dayLabel(b.exactDay)}</div>
+      <div class="up-name">${b.name}</div>
+      <div class="up-amount ${cls}">${fmt(b.amount)}</div>
+      <div style="margin-top:7px">${badge(b.id)}</div>
+    </div>`;
+  }).join('');
+}
+
+function badge(id) {
+  const s = getStatus(id);
+  if (s === 'paid') return `<span class="badge badge-paid locked" onclick="event.stopPropagation();toggleStatus('${id}')">✓ PAID</span>`;
+  if (s === 'due')  return `<span class="badge badge-due"          onclick="event.stopPropagation();toggleStatus('${id}')">! DUE</span>`;
+  return `<span class="badge badge-hold locked">⏸ ON HOLD</span>`;
+}
+
+function editIcon(id) {
+  return `<span class="edit-icon" onclick="event.stopPropagation();openModal('${id}')" title="Edit">✏️</span>`;
+}
+
+function renderBillSections() {
+  let html = '';
+
+  CAT_ORDER.forEach(cat => {
+    let bills = DATA.filter(b => b.cat === cat);
+    if (!showInactive) bills = bills.filter(b => getStatus(b.id) !== 'hold');
+
+    const icon     = CAT_ICONS[cat] || '📋';
+    const active   = bills.filter(b => getStatus(b.id) !== 'hold');
+    const paid     = active.filter(b => getStatus(b.id) === 'paid');
+    const totalAmt = active.reduce((s,b) => s+b.amount, 0);
+    const col      = !!collapsed[cat];
+
+    html += `
+      <div class="section">
+        <div class="sec-header" onclick="toggleSection('${cat}')">
+          <div class="sec-title">${icon} ${cat} <span class="sec-badge">${paid.length}/${active.length} paid</span></div>
+          <div class="sec-right">
+            <span class="sec-amount">${fmt(totalAmt)}/mo</span>
+            <span class="chevron ${col?'':'open'}" id="chev-${cat}">▼</span>
+          </div>
+        </div>
+        <div class="sec-body ${col?'collapsed':''}" id="body-${cat}">
+          ${bills.map(b => billRow(b)).join('')}
+          ${editMode ? `<div class="add-row" onclick="openModal(null); document.getElementById('f-cat').value='${cat}'; updateModalFields()">＋ Add to ${cat}</div>` : ''}
+        </div>
+      </div>`;
+  });
+
+  // Income section
+  const incomeBills = DATA.filter(b => b.cat === 'INCOME');
+  const incomeTotal = incomeBills.reduce((s,b) => s+b.amount, 0);
+  const incCol      = !!collapsed['INCOME'];
+
+  html += `
+    <div class="section">
+      <div class="sec-header" onclick="toggleSection('INCOME')">
+        <div class="sec-title">💚 INCOME <span class="sec-badge">${incomeBills.length} source${incomeBills.length!==1?'s':''}</span></div>
+        <div class="sec-right">
+          <span class="sec-amount" style="color:var(--green)">+${fmt(incomeTotal)}/mo</span>
+          <span class="chevron ${incCol?'':'open'}" id="chev-INCOME">▼</span>
+        </div>
+      </div>
+      <div class="sec-body ${incCol?'collapsed':''}" id="body-INCOME">
+        ${incomeBills.map(b => `
+          <div class="bill-row no-click" style="cursor:${editMode?'pointer':'default'}" ${editMode?`onclick="openModal('${b.id}')"`:''}>
+            <div style="flex:1">
+              <div class="bill-name">${b.name}</div>
+              <div class="bill-meta">${b.note || (b.dueDay ? dueDayLabel(b.dueDay) : 'No fixed date')}</div>
+            </div>
+            <div class="bill-amount" style="color:var(--green)">${b.amount > 0 ? '+'+fmt(b.amount) : 'Variable'}</div>
+            <span class="badge badge-income">INCOME</span>
+            ${editMode ? editIcon(b.id) : ''}
+          </div>`).join('')}
+        ${editMode ? `<div class="add-row" onclick="openModal(null); document.getElementById('f-cat').value='INCOME'; updateModalFields()">＋ Add Income Source</div>` : ''}
+      </div>
+    </div>`;
+
+  document.getElementById('bill-sections').innerHTML = html;
+}
+
+function billRow(b) {
+  const s   = getStatus(b.id);
+  const rowCls = s==='paid' ? 'is-paid' : s==='hold' ? 'is-hold' : '';
+  const click  = s !== 'hold' ? `onclick="toggleStatus('${b.id}')"` : '';
+  return `
+    <div class="bill-row ${rowCls}" ${click}>
+      <div style="flex:1">
+        <div class="bill-name">${b.name}</div>
+        <div class="bill-meta">${b.pay || ''}</div>
+      </div>
+      <div class="bill-due">${dueDayLabel(b.dueDay)}</div>
+      <div class="bill-amount">${b.amount > 0 ? fmt(b.amount) : '—'}</div>
+      ${badge(b.id)}
+      ${editMode ? editIcon(b.id) : ''}
+    </div>`;
+}
+
+function renderAccounts() {
+  document.getElementById('accounts-grid').innerHTML = ACCOUNTS.map(a => {
+    if (a.type === 'cc') {
+      const pct = Math.min(Math.round(a.used/a.limit*100),100);
+      const cls = a.available<0 ? 'c-red' : a.available<100 ? 'c-orange' : 'c-green';
+      const bar = a.available<0 ? 'var(--red)' : a.available<100 ? 'var(--orange)' : 'var(--green)';
+      return `<div class="acc-card">
+        <div class="acc-name">💳 ${a.name}</div>
+        <div class="acc-balance ${cls}">${fmt(a.available)} avail</div>
+        <div class="acc-sub">${fmt(a.used)} of ${fmt(a.limit)} used</div>
+        <div class="progress-bar" style="margin-top:5px"><div class="progress-fill" style="width:${pct}%;background:${bar}"></div></div>
+      </div>`;
+    }
+    const icons = { checking:'🏛️', savings:'🏦', cash:'💵', crypto:'₿' };
+    const cls   = a.balance>=500 ? 'c-green' : a.balance>0 ? '' : 'c-red';
+    return `<div class="acc-card">
+      <div class="acc-name">${icons[a.type]||'💰'} ${a.name}</div>
+      <div class="acc-balance ${cls}">${fmt(a.balance)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSummary() {
+  const expenses    = DATA.filter(b => b.cat !== 'INCOME' && getStatus(b.id) !== 'hold');
+  const totalExpOut = expenses.reduce((s,b) => s+b.amount, 0);
+  const totalIncIn  = DATA.filter(b => b.cat === 'INCOME').reduce((s,b) => s+b.amount, 0);
+  const net         = totalIncIn - totalExpOut;
+  const netSign     = net >= 0 ? '+' : '−';
+  const netCls      = net >= 0 ? 'c-green' : 'c-red';
+
+  document.getElementById('summary').innerHTML = `
+    <div class="sum-title">📊 Monthly Summary</div>
+    <div class="sum-grid">
+      <div class="sum-item">
+        <div class="sum-label">Total Income</div>
+        <div class="sum-val c-green">+${fmt(totalIncIn)}</div>
+        <div class="stat-sub">${DATA.filter(b=>b.cat==='INCOME').length} income sources</div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-label">Total Expenses</div>
+        <div class="sum-val c-red">−${fmt(totalExpOut)}</div>
+        <div class="stat-sub">All active bills</div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-label">Monthly Net</div>
+        <div class="sum-val ${netCls}">${netSign}${fmt(Math.abs(net))}</div>
+        <div class="stat-sub">${net>=0?'Surplus':'Shortfall'} each month</div>
+      </div>
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════
+// NEW MONTH DETECTION
+// ════════════════════════════════════════════════════
+
+(function checkNewMonth() {
+  const lastKey = localStorage.getItem('budget_last_key');
+  const curKey  = monthKey();
+  if (lastKey && lastKey !== curKey) {
+    const now = new Date();
+    if (now.getDate() <= 4) {
+      setTimeout(() => {
+        const label = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+        if (confirm(`🗓 New month! (${label})\n\nReset all bill statuses to DUE?`)) {
+          state = {}; saveState();
+        }
+      }, 600);
+    }
+  }
+  localStorage.setItem('budget_last_key', curKey);
+})();
+
+render();
+</script>
+</body>
+</html>
