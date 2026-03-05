@@ -950,6 +950,10 @@ function renderCalendar() {
 // BUDGET PLANNER
 // ════════════════════════════════════════════════════
 
+function getPaycheckAmount() {
+  return parseFloat(localStorage.getItem('budget_paycheck_amount')) || 2000;
+}
+
 function renderBudgetPlanner() {
   const income   = DATA.filter(b => b.cat === 'INCOME');
   const expenses = DATA.filter(b => b.cat !== 'INCOME' && getStatus(b.id) !== 'hold');
@@ -986,7 +990,7 @@ function renderBudgetPlanner() {
   const noDueBills = expenses.filter(b => !b.dueDay || b.dueDay === 'biweekly');
   const p1Total = p1Bills.reduce((s,b)=>s+b.amount,0);
   const p2Total = p2Bills.reduce((s,b)=>s+b.amount,0);
-  const paycheck = 2000; // ~half of BayHealth bi-weekly $4000
+  const paycheck = getPaycheckAmount();
 
   // Top levers (largest flexible/investment expenses)
   const levers = [...flexible,...invest].sort((a,b)=>b.amount-a.amount).slice(0,6);
@@ -1009,9 +1013,10 @@ function renderBudgetPlanner() {
           <!-- Income summary -->
           <div class="planner-card">
             <div class="planner-card-title">💚 Income Sources</div>
-            ${income.map(b=>`<div class="planner-row">
+            ${income.map(b=>`<div class="planner-row" ${editMode?`onclick="openModal('${b.id}')" style="cursor:pointer"`:''}>
               <span class="planner-row-name">${b.name}</span>
               <span class="planner-row-amt c-green">${b.amount>0?'+'+fmt(b.amount):'Variable'}</span>
+              ${editMode?`<span class="edit-icon" style="margin-left:4px" onclick="event.stopPropagation();openModal('${b.id}')">✏️</span>`:''}
             </div>`).join('')}
             <div class="planner-total">
               <span>Total / month</span>
@@ -1052,10 +1057,11 @@ function renderBudgetPlanner() {
                 <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between">
                   <span>${bucket.label}</span><span>${fmt(total)}</span>
                 </div>
-                ${bucket.bills.map(b=>`<div class="planner-row">
+                ${bucket.bills.map(b=>`<div class="planner-row" ${editMode?`onclick="openModal('${b.id}')" style="cursor:pointer"`:''}>
                   <div class="priority-dot" style="background:${bucket.color}"></div>
                   <span class="planner-row-name">${b.name}</span>
                   <span class="planner-row-amt">${fmt(b.amount)}</span>
+                  ${editMode?`<span class="edit-icon" style="margin-left:4px" onclick="event.stopPropagation();openModal('${b.id}')">✏️</span>`:''}
                 </div>`).join('')}
               </div>`;
             }).join('')}
@@ -1063,12 +1069,20 @@ function renderBudgetPlanner() {
 
           <!-- Paycheck allocation -->
           <div class="planner-card">
-            <div class="planner-card-title">💸 Paycheck Allocation (~$${(paycheck).toLocaleString()} each)</div>
+            <div class="planner-card-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <span>💸 Paycheck Allocation</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:400;color:var(--muted)">
+                Per paycheck: <input type="number" value="${paycheck}" step="100" min="0"
+                  style="width:78px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--text);font-size:11px"
+                  onchange="localStorage.setItem('budget_paycheck_amount',this.value);renderBudgetPlanner()">
+              </span>
+            </div>
             <div class="period-header">Paycheck 1 — Bills due 1st–15th</div>
-            ${p1Bills.map(b=>`<div class="planner-row">
+            ${p1Bills.map(b=>`<div class="planner-row" ${editMode?`onclick="openModal('${b.id}')" style="cursor:pointer"`:''}>
               <span class="planner-row-name">${b.name}</span>
               <span style="font-size:11px;color:var(--muted);margin-right:6px">${ord(Array.isArray(b.dueDay)?b.dueDay[0]:b.dueDay)}</span>
               <span class="planner-row-amt">${fmt(b.amount)}</span>
+              ${editMode?`<span class="edit-icon" style="margin-left:4px" onclick="event.stopPropagation();openModal('${b.id}')">✏️</span>`:''}
             </div>`).join('')}
             <div class="period-total">
               <span>Total</span>
@@ -1077,10 +1091,11 @@ function renderBudgetPlanner() {
 
             <div style="margin-top:14px"></div>
             <div class="period-header">Paycheck 2 — Bills due 16th–31st</div>
-            ${p2Bills.map(b=>`<div class="planner-row">
+            ${p2Bills.map(b=>`<div class="planner-row" ${editMode?`onclick="openModal('${b.id}')" style="cursor:pointer"`:''}>
               <span class="planner-row-name">${b.name}</span>
               <span style="font-size:11px;color:var(--muted);margin-right:6px">${ord(Array.isArray(b.dueDay)?b.dueDay[0]:b.dueDay)}</span>
               <span class="planner-row-amt">${fmt(b.amount)}</span>
+              ${editMode?`<span class="edit-icon" style="margin-left:4px" onclick="event.stopPropagation();openModal('${b.id}')">✏️</span>`:''}
             </div>`).join('')}
             ${noDueBills.length ? `<div style="font-size:11px;color:var(--muted);padding:4px 0">${noDueBills.map(b=>b.name).join(', ')} — no fixed date</div>` : ''}
             <div class="period-total">
@@ -1438,18 +1453,21 @@ function renderAccountsV2() {
         return `<div class="acct-group-title">${g.icon} ${g.label}</div>` +
           accts.map(a => {
             if (a.type === 'cc') {
-              const avail = (a.limit||0) - (a.used||0);
-              const pct   = Math.min(Math.round((a.used||0)/(a.limit||1)*100),100);
-              const cls   = avail < 0 ? 'c-red' : avail < 100 ? 'c-orange' : 'c-green';
-              const bar   = avail < 0 ? 'var(--red)' : avail < 100 ? 'var(--orange)' : 'var(--green)';
+              const avail  = (a.limit||0) - (a.used||0);
+              const pct    = Math.min(Math.round((a.used||0)/(a.limit||1)*100),100);
+              const cls    = avail < 0 ? 'c-red' : avail < 100 ? 'c-orange' : 'c-green';
+              const bar    = avail < 0 ? 'var(--red)' : avail < 100 ? 'var(--orange)' : 'var(--green)';
+              const pctCls = pct >= 90 ? 'c-red' : pct >= 70 ? 'c-orange' : 'c-green';
               return `<div class="acct-row">
                 <div class="acct-row-name">${a.name}</div>
                 <div class="acct-row-sub">${fmt(a.used||0)} / ${fmt(a.limit||0)}</div>
                 <div class="acct-row-bal ${cls}">${fmt(avail)} avail</div>
+                <div style="font-size:13px;font-weight:800;min-width:40px;text-align:right" class="${pctCls}">${pct}%</div>
                 ${editMode ? `<span class="edit-icon" onclick="openAcctModal('${a.id}')">✏️</span>` : ''}
               </div>
-              <div style="padding:0 15px 6px">
-                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${bar}"></div></div>
+              <div style="padding:0 15px 6px;display:flex;align-items:center;gap:8px">
+                <div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:${pct}%;background:${bar}"></div></div>
+                <span style="font-size:10px;color:var(--muted);min-width:50px">${pct}% utilized</span>
               </div>`;
             }
             if (a.type === 'loan') {
