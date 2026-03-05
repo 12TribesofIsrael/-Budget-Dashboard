@@ -240,6 +240,76 @@
     @keyframes slideUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
     .footer { text-align: center; padding: 16px; color: var(--muted); font-size: 11px; }
+
+    /* ── ACCOUNT MODAL (2nd modal) ── */
+    .acc-modal-fields { display: flex; flex-direction: column; gap: 13px; }
+
+    /* ── ACCOUNTS V2 ── */
+    .acct-group-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--muted);
+      padding: 10px 15px 5px; border-top: 1px solid var(--border);
+    }
+    .acct-group-title:first-child { border-top: none; }
+    .acct-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 15px; border-bottom: 1px solid var(--border);
+      transition: background .1s; cursor: default;
+    }
+    .acct-row:last-child { border-bottom: none; }
+    .acct-row:hover { background: var(--surface2); }
+    .acct-row-name { flex: 1; font-size: 13px; font-weight: 500; }
+    .acct-row-bal  { font-size: 13px; font-weight: 700; min-width: 80px; text-align: right; }
+    .acct-row-sub  { font-size: 11px; color: var(--muted); min-width: 110px; text-align: right; }
+    .nw-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; padding: 14px; }
+    @media(max-width:760px){ .nw-grid { grid-template-columns: repeat(2,1fr); } }
+
+    /* ── CALENDAR ── */
+    .cal-header { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; }
+    .cal-dow { padding: 6px 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); border-top: 1px solid var(--border); border-left: 1px solid var(--border); margin: 0 14px 14px; border-radius: 6px; overflow: hidden; }
+    .cal-cell { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 82px; padding: 5px; position: relative; background: var(--surface); transition: background .1s; }
+    .cal-cell.empty { background: var(--bg); }
+    .cal-cell.today { box-shadow: inset 0 0 0 2px var(--blue); }
+    .cal-cell.has-bills  { background: #1a1118; }
+    .cal-cell.has-pay    { background: #131d15; }
+    .cal-day  { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+    .cal-cell.today .cal-day { color: var(--blue); }
+    .cal-pill {
+      display: block; font-size: 9px; font-weight: 600;
+      padding: 2px 5px; border-radius: 4px; margin-bottom: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .cal-pill:hover { opacity: .75; }
+    .cal-pill.due  { background: var(--red-bg);   color: var(--red);   border: 1px solid rgba(248,81,73,.3); }
+    .cal-pill.paid { background: var(--green-bg); color: var(--green); border: 1px solid rgba(63,185,80,.25); opacity:.6; }
+    .cal-pill.pay  { background: var(--green-bg); color: var(--green); border: 1px solid rgba(63,185,80,.4); cursor:default; }
+    .cal-pill.more { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); cursor:default; }
+    .cal-paycheck-input { display: flex; align-items: center; gap: 8px; padding: 10px 15px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+    .cal-paycheck-input input { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 4px 9px; color: var(--text); font-size: 12px; }
+    .cal-paycheck-input input:focus { outline: none; border-color: var(--blue); }
+
+    /* ── BUDGET PLANNER ── */
+    .planner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px; }
+    @media(max-width:680px){ .planner-grid { grid-template-columns: 1fr; } }
+    .planner-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+    .planner-card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 10px; }
+    .planner-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .planner-row:last-child { border-bottom: none; }
+    .planner-row-name { flex: 1; font-weight: 500; }
+    .planner-row-amt  { font-weight: 700; font-size: 13px; }
+    .planner-total { display: flex; justify-content: space-between; padding-top: 8px; margin-top: 2px; border-top: 2px solid var(--border); font-weight: 700; font-size: 14px; }
+    .planner-gap { text-align: center; padding: 16px; }
+    .planner-gap-val { font-size: 36px; font-weight: 800; }
+    .planner-gap-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .lever-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .lever-row:last-child { border-bottom: none; }
+    .lever-name { flex: 1; }
+    .lever-amt { font-weight: 700; color: var(--orange); }
+    .period-header { font-size: 12px; font-weight: 700; color: var(--blue); margin-bottom: 8px; }
+    .period-total { display: flex; justify-content: space-between; padding: 6px 0 0; margin-top: 4px; border-top: 1px solid var(--border); font-size: 12px; font-weight: 700; }
+    .priority-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink:0; margin-right: 6px; }
   </style>
 </head>
 <body>
@@ -274,15 +344,14 @@
 
   <div id="bill-sections"></div>
 
-  <div class="section">
-    <div class="sec-header" onclick="toggleSection('accounts')">
-      <div class="sec-title">🏦 Account Snapshot <span class="sec-badge">as of 2/20/26</span></div>
-      <span class="chevron open" id="chev-accounts">▼</span>
-    </div>
-    <div class="sec-body" id="body-accounts">
-      <div class="accounts-grid" id="accounts-grid"></div>
-    </div>
-  </div>
+  <!-- Accounts V2 (dynamic) -->
+  <div id="accounts-v2"></div>
+
+  <!-- Cash Flow Calendar -->
+  <div id="calendar-section"></div>
+
+  <!-- Budget Planner -->
+  <div id="planner-section"></div>
 
   <div class="summary" id="summary"></div>
   <div class="footer">Click any bill row to mark paid · ✏️ Edit to customize · Saves automatically</div>
@@ -352,6 +421,60 @@
   </div>
 </div>
 
+<!-- ═══ ACCOUNT MODAL ═══ -->
+<div class="modal-overlay" id="acct-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="acct-modal-title">Edit Account</span>
+      <button class="modal-close" onclick="closeAcctModal()">×</button>
+    </div>
+    <div class="modal-body acc-modal-fields">
+      <div class="field">
+        <label>Account Name</label>
+        <input type="text" id="af-name" placeholder="e.g. Chase Checking">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Account Type</label>
+          <select id="af-type" onchange="updateAcctModalFields()">
+            <option value="checking">🏛️ Checking</option>
+            <option value="savings">🏦 Savings</option>
+            <option value="cash">💵 Cash</option>
+            <option value="investment">📈 Investment</option>
+            <option value="crypto">₿ Crypto</option>
+            <option value="cc">💳 Credit Card</option>
+            <option value="loan">🔴 Loan / Debt</option>
+          </select>
+        </div>
+        <div class="field" id="af-balance-field">
+          <label>Balance</label>
+          <input type="number" id="af-balance" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <div class="field-row" id="af-cc-fields" style="display:none">
+        <div class="field">
+          <label>Credit Limit</label>
+          <input type="number" id="af-limit" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Amount Used (Balance)</label>
+          <input type="number" id="af-used" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <div class="field" id="af-loan-field" style="display:none">
+        <label>Amount Owed</label>
+        <input type="number" id="af-loan-bal" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="af-delete-btn" onclick="deleteAccount()">🗑 Delete</button>
+      <div class="spacer"></div>
+      <button class="btn" onclick="closeAcctModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAccount()">Save</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -408,20 +531,71 @@ const DEFAULT_BILLS = [
   { id:'turo',            name:'Turo Rental',           cat:'INCOME',      amount:200,     dueDay:null,       pay:'', note:'Monthly' },
 ];
 
-const ACCOUNTS = [
-  { name:'DCU Checking',    balance:6881.85,  type:'checking' },
-  { name:'Wells Fargo',     balance:1494.59,  type:'checking' },
-  { name:'Truist Business', balance:619.88,   type:'checking' },
-  { name:'Truist Checking', balance:284.01,   type:'checking' },
-  { name:'NIHFCU Checking', balance:496.16,   type:'checking' },
-  { name:'Cash App',        balance:390,      type:'cash' },
-  { name:'DCU Savings',     balance:1016.26,  type:'savings' },
-  { name:'Crypto',          balance:999.29,   type:'crypto' },
-  { name:'DCU CC',     limit:20000, used:12508.31, available:7491.69,  type:'cc' },
-  { name:'Truist CC',  limit:4900,  used:4935.21,  available:-35.21,   type:'cc' },
-  { name:'Langley CC', limit:10000, used:9988.74,  available:11.26,    type:'cc' },
-  { name:'NIHFCU CC',  limit:2000,  used:1392,     available:608,      type:'cc' },
+const DEFAULT_ACCOUNTS = [
+  // ── CHECKING / CASH ──────────────────────────────────
+  { id:'dcu_check',     name:'DCU Checking (9419)',    type:'checking',   balance:6881.85 },
+  { id:'dcu_mommas',    name:'DCU Mommas Checking',    type:'checking',   balance:150 },
+  { id:'wf_1753',       name:'Wells Fargo (...1753)',  type:'checking',   balance:1494.59 },
+  { id:'wf_3769',       name:'Wells Fargo (...3769)',  type:'checking',   balance:10 },
+  { id:'truist_biz',    name:'Truist Business',        type:'checking',   balance:619.88 },
+  { id:'truist_chk',    name:'Truist Checking',        type:'checking',   balance:284.01 },
+  { id:'nihfcu_chk',    name:'NIHFCU Checking',        type:'checking',   balance:496.16 },
+  { id:'cashapp1',      name:'Cash App 1',             type:'cash',       balance:390 },
+  { id:'cashapp2',      name:'Cash App 2',             type:'cash',       balance:5 },
+  { id:'square',        name:'Square Checking',        type:'checking',   balance:9.75 },
+  { id:'penfed_chk',    name:'PenFed Checking',        type:'checking',   balance:69.75 },
+  { id:'langley_chk',   name:'Langley Checking',       type:'checking',   balance:60 },
+  { id:'navyfed_5366',  name:'Navy Federal (5366)',    type:'checking',   balance:18.69 },
+  { id:'navyfed_3890',  name:'Navy Federal (3890)',    type:'checking',   balance:13.60 },
+  { id:'delone_chk',    name:'Del-One Checking',       type:'checking',   balance:18 },
+  { id:'home_cash',     name:'Home Cash',              type:'cash',       balance:0 },
+  // ── SAVINGS ──────────────────────────────────────────
+  { id:'dcu_sav1',      name:'DCU Savings 1',          type:'savings',    balance:1016.26 },
+  { id:'dcu_sav2',      name:'DCU Savings 2',          type:'savings',    balance:2.23 },
+  { id:'truist_sav',    name:'Truist Savings',         type:'savings',    balance:6 },
+  { id:'truist_mma',    name:'Truist MMA',             type:'savings',    balance:3.39 },
+  { id:'nihfcu_sav',    name:'NIHFCU Savings',         type:'savings',    balance:4.32 },
+  { id:'langley_sav',   name:'Langley Savings',        type:'savings',    balance:11.22 },
+  { id:'penfed_sav',    name:'PenFed Savings',         type:'savings',    balance:5 },
+  { id:'delone_sav',    name:'Del-One Savings',        type:'savings',    balance:0.69 },
+  // ── INVESTMENTS ──────────────────────────────────────
+  { id:'fidelity1',     name:'Fidelity 401k (1)',      type:'investment', balance:1.21 },
+  { id:'fidelity2',     name:'Fidelity 401k (2)',      type:'investment', balance:94.96 },
+  { id:'schwab',        name:'Schwab Personal',        type:'investment', balance:18.94 },
+  { id:'twitter',       name:'Twitter Stock',          type:'investment', balance:92 },
+  { id:'distrokid',     name:'Distro Kid',             type:'investment', balance:101.75 },
+  { id:'songtrust',     name:'Songtrust',              type:'investment', balance:0.58 },
+  // ── CRYPTO ───────────────────────────────────────────
+  { id:'crypto_tot',    name:'Crypto (Coinbase)',       type:'crypto',    balance:999.29 },
+  { id:'exodus',        name:'Exodus Wallet',          type:'crypto',    balance:127.21 },
+  { id:'ledger1',       name:'Ledger Wallet 1',        type:'crypto',    balance:0 },
+  { id:'ledger2',       name:'Ledger Wallet 2',        type:'crypto',    balance:0 },
+  // ── CREDIT CARDS ─────────────────────────────────────
+  { id:'cc_dcu',        name:'DCU CC',                 type:'cc',        limit:20000,  used:12508.31 },
+  { id:'cc_truist',     name:'Truist CC',              type:'cc',        limit:4900,   used:4935.21  },
+  { id:'cc_langley',    name:'Langley CC',             type:'cc',        limit:10000,  used:9988.74  },
+  { id:'cc_nihfcu',     name:'NIHFCU CC',              type:'cc',        limit:2000,   used:1392     },
+  { id:'cc_truist_sec', name:'Truist Secured CC',      type:'cc',        limit:400,    used:388.88   },
+  // ── LOANS ────────────────────────────────────────────
+  { id:'loan_dcu',      name:'DCU Personal Loan',      type:'loan',      balance:1045.32 },
+  { id:'loan_nihfcu',   name:'NIHFCU Refinance (Car)', type:'loan',      balance:11810.45 },
 ];
+
+function loadAccounts() {
+  try {
+    const v = localStorage.getItem('budget_accounts_v3');
+    if (v) { const p = JSON.parse(v); return p.accounts || p; }
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_ACCOUNTS));
+}
+function saveAccounts() {
+  localStorage.setItem('budget_accounts_v3', JSON.stringify({ lastUpdated: Date.now(), accounts: ACCTS }));
+}
+function getAcctLastUpdated() {
+  try { const v = localStorage.getItem('budget_accounts_v3'); if(v) { const p=JSON.parse(v); return p.lastUpdated||null; } } catch(e){}
+  return null;
+}
+let ACCTS = loadAccounts();
 
 const CAT_ORDER = ['MANDATORY','SYSTEM','MISC','MARNAYSHA','INVESTMENTS'];
 const CAT_ICONS = { MANDATORY:'🏠', SYSTEM:'💻', MISC:'🎯', MARNAYSHA:'👪', INVESTMENTS:'📈', INCOME:'💚' };
@@ -671,6 +845,259 @@ function toast(msg) {
 }
 
 // ════════════════════════════════════════════════════
+// CASH FLOW CALENDAR
+// ════════════════════════════════════════════════════
+
+function getPaycheckDays(year, month) {
+  const anchor = localStorage.getItem('budget_paycheck_anchor');
+  if (!anchor) return [];
+  const base = new Date(anchor + 'T12:00:00');
+  if (isNaN(base)) return [];
+  const days = new Set();
+  // walk forward and backward by 2-week steps from anchor
+  for (let step = -10; step <= 10; step++) {
+    const d = new Date(base.getTime() + step * 14 * 86400000);
+    if (d.getFullYear() === year && d.getMonth() === month) days.add(d.getDate());
+  }
+  return [...days].sort((a,b)=>a-b);
+}
+
+function renderCalendar() {
+  const now     = new Date();
+  const year    = now.getFullYear();
+  const month   = now.getMonth();
+  const today   = now.getDate();
+  const anchor  = localStorage.getItem('budget_paycheck_anchor') || '';
+  const monthLabel = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  const firstDow     = new Date(year, month, 1).getDay();
+  const daysInMonth  = new Date(year, month+1, 0).getDate();
+  const paycheckDays = new Set(getPaycheckDays(year, month));
+
+  // map bill due days → bill list
+  const billMap = {};
+  DATA.filter(b => b.cat !== 'INCOME' && getStatus(b.id) !== 'hold').forEach(b => {
+    if (!b.dueDay || b.dueDay === 'biweekly') return;
+    const days = Array.isArray(b.dueDay) ? b.dueDay : [b.dueDay];
+    days.forEach(d => {
+      if (d >= 1 && d <= daysInMonth) {
+        if (!billMap[d]) billMap[d] = [];
+        billMap[d].push(b);
+      }
+    });
+  });
+
+  // Build cell HTML
+  const DAYS_OF_WEEK = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let cells = '';
+  // Empty leading cells
+  for (let i = 0; i < firstDow; i++) cells += `<div class="cal-cell empty"></div>`;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const bills    = billMap[d] || [];
+    const hasPay   = paycheckDays.has(d);
+    const isToday  = d === today;
+    const hasBills = bills.some(b => getStatus(b.id) === 'due');
+    let cls = '';
+    if (isToday)  cls += ' today';
+    if (hasBills) cls += ' has-bills';
+    if (hasPay)   cls += ' has-pay';
+
+    let pills = '';
+    if (hasPay) {
+      const payAmt = DATA.filter(b=>b.cat==='INCOME'&&b.id==='bayhealth').reduce((_,b)=>b.amount,0)||4000;
+      pills += `<span class="cal-pill pay">+${fmt(payAmt/2)} pay</span>`;
+    }
+    const shown = bills.slice(0, hasPay ? 1 : 2);
+    const extra = bills.length - shown.length;
+    shown.forEach(b => {
+      const s = getStatus(b.id);
+      pills += `<span class="cal-pill ${s}" onclick="toggleStatus('${b.id}')" title="${b.name} ${fmt(b.amount)}">${b.name.length>10?b.name.slice(0,9)+'…':b.name}</span>`;
+    });
+    if (extra > 0) pills += `<span class="cal-pill more">+${extra} more</span>`;
+
+    cells += `<div class="cal-cell${cls}"><div class="cal-day">${d}</div>${pills}</div>`;
+  }
+
+  const col = !!collapsed['calendar'];
+  document.getElementById('calendar-section').innerHTML = `
+    <div class="section">
+      <div class="sec-header" onclick="toggleSection('calendar')">
+        <div class="sec-title">📆 Cash Flow — ${monthLabel}</div>
+        <span class="chevron ${col?'':'open'}" id="chev-calendar">▼</span>
+      </div>
+      <div class="sec-body ${col?'collapsed':''}" id="body-calendar">
+        <div class="cal-paycheck-input">
+          <span>BayHealth next paycheck date:</span>
+          <input type="date" value="${anchor}" onchange="localStorage.setItem('budget_paycheck_anchor',this.value);renderCalendar()">
+          <span style="color:var(--muted);font-size:11px">(used to show biweekly pay days on calendar)</span>
+        </div>
+        <div style="padding:0 14px 4px">
+          <div class="cal-header">${DAYS_OF_WEEK.map(d=>`<div class="cal-dow">${d}</div>`).join('')}</div>
+        </div>
+        <div class="cal-grid">${cells}</div>
+      </div>
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════
+// BUDGET PLANNER
+// ════════════════════════════════════════════════════
+
+function renderBudgetPlanner() {
+  const income   = DATA.filter(b => b.cat === 'INCOME');
+  const expenses = DATA.filter(b => b.cat !== 'INCOME' && getStatus(b.id) !== 'hold');
+  const totalIn  = income.reduce((s,b) => s+b.amount, 0);
+  const totalOut = expenses.reduce((s,b) => s+b.amount, 0);
+  const gap      = totalIn - totalOut;
+  const gapCls   = gap >= 0 ? 'c-green' : 'c-red';
+  const gapSign  = gap >= 0 ? '+' : '−';
+
+  // Priority buckets
+  const criticalIds = ['mortgage','car_note_dcu','car_note_nihfcu','car_insurance','dcu_loan','loan_nihfcu'];
+  const importantIds = ['cell_phone','dcu_cc','truist_cc_2756','truist_cc_3345','dover_cc','langley_cc','nihfcu_cc','taxes_federal','taxes_state','gas_car'];
+  const critical  = expenses.filter(b => criticalIds.includes(b.id));
+  const important = expenses.filter(b => importantIds.includes(b.id));
+  const flexible  = expenses.filter(b => !criticalIds.includes(b.id) && !importantIds.includes(b.id) && b.cat !== 'INVESTMENTS');
+  const invest    = expenses.filter(b => b.cat === 'INVESTMENTS');
+
+  const priorityBuckets = [
+    { label:'🔴 Critical',   color:'#f85149', bills: critical },
+    { label:'🟡 Important',  color:'#d29922', bills: important },
+    { label:'🟢 Flexible',   color:'#3fb950', bills: flexible },
+    { label:'📈 Investments',color:'#58a6ff', bills: invest },
+  ];
+
+  // Paycheck period split (biweekly ~$2000 each paycheck)
+  const p1Bills = expenses.filter(b => {
+    const d = Array.isArray(b.dueDay)?b.dueDay[0]:b.dueDay;
+    return typeof d==='number' && d >= 1 && d <= 15;
+  });
+  const p2Bills = expenses.filter(b => {
+    const d = Array.isArray(b.dueDay)?b.dueDay[0]:b.dueDay;
+    return typeof d==='number' && d > 15;
+  });
+  const noDueBills = expenses.filter(b => !b.dueDay || b.dueDay === 'biweekly');
+  const p1Total = p1Bills.reduce((s,b)=>s+b.amount,0);
+  const p2Total = p2Bills.reduce((s,b)=>s+b.amount,0);
+  const paycheck = 2000; // ~half of BayHealth bi-weekly $4000
+
+  // Top levers (largest flexible/investment expenses)
+  const levers = [...flexible,...invest].sort((a,b)=>b.amount-a.amount).slice(0,6);
+
+  const col = !!collapsed['planner'];
+  const pct = Math.min(Math.round(totalOut/totalIn*100),100);
+
+  document.getElementById('planner-section').innerHTML = `
+    <div class="section">
+      <div class="sec-header" onclick="toggleSection('planner')">
+        <div class="sec-title">🎯 Monthly Budget Planner</div>
+        <div class="sec-right">
+          <span class="sec-amount ${gapCls}">${gapSign}${fmt(Math.abs(gap))}/mo</span>
+          <span class="chevron ${col?'':'open'}" id="chev-planner">▼</span>
+        </div>
+      </div>
+      <div class="sec-body ${col?'collapsed':''}" id="body-planner">
+        <div class="planner-grid">
+
+          <!-- Income summary -->
+          <div class="planner-card">
+            <div class="planner-card-title">💚 Income Sources</div>
+            ${income.map(b=>`<div class="planner-row">
+              <span class="planner-row-name">${b.name}</span>
+              <span class="planner-row-amt c-green">${b.amount>0?'+'+fmt(b.amount):'Variable'}</span>
+            </div>`).join('')}
+            <div class="planner-total">
+              <span>Total / month</span>
+              <span class="c-green">+${fmt(totalIn)}</span>
+            </div>
+          </div>
+
+          <!-- Budget gap -->
+          <div class="planner-card">
+            <div class="planner-card-title">📊 Monthly Overview</div>
+            <div class="planner-gap">
+              <div class="planner-gap-val ${gapCls}">${gapSign}${fmt(Math.abs(gap))}</div>
+              <div class="planner-gap-label">${gap>=0?'Monthly surplus':'Monthly shortfall'}</div>
+            </div>
+            <div class="planner-row" style="margin-top:4px">
+              <span>Income</span><span class="c-green">+${fmt(totalIn)}</span>
+            </div>
+            <div class="planner-row">
+              <span>Expenses</span><span class="c-red">−${fmt(totalOut)}</span>
+            </div>
+            <div style="margin-top:8px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">
+                <span>Budget used</span><span>${pct}%</span>
+              </div>
+              <div class="progress-bar" style="height:8px">
+                <div class="progress-fill" style="width:${Math.min(pct,100)}%;background:${pct>100?'var(--red)':pct>80?'var(--orange)':'var(--green)'}"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expense by priority -->
+          <div class="planner-card">
+            <div class="planner-card-title">📋 Expenses by Priority</div>
+            ${priorityBuckets.map(bucket => {
+              if (!bucket.bills.length) return '';
+              const total = bucket.bills.reduce((s,b)=>s+b.amount,0);
+              return `<div style="margin-bottom:8px">
+                <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between">
+                  <span>${bucket.label}</span><span>${fmt(total)}</span>
+                </div>
+                ${bucket.bills.map(b=>`<div class="planner-row">
+                  <div class="priority-dot" style="background:${bucket.color}"></div>
+                  <span class="planner-row-name">${b.name}</span>
+                  <span class="planner-row-amt">${fmt(b.amount)}</span>
+                </div>`).join('')}
+              </div>`;
+            }).join('')}
+          </div>
+
+          <!-- Paycheck allocation -->
+          <div class="planner-card">
+            <div class="planner-card-title">💸 Paycheck Allocation (~$${(paycheck).toLocaleString()} each)</div>
+            <div class="period-header">Paycheck 1 — Bills due 1st–15th</div>
+            ${p1Bills.map(b=>`<div class="planner-row">
+              <span class="planner-row-name">${b.name}</span>
+              <span style="font-size:11px;color:var(--muted);margin-right:6px">${ord(Array.isArray(b.dueDay)?b.dueDay[0]:b.dueDay)}</span>
+              <span class="planner-row-amt">${fmt(b.amount)}</span>
+            </div>`).join('')}
+            <div class="period-total">
+              <span>Total</span>
+              <span class="${p1Total>paycheck?'c-red':'c-green'}">${fmt(p1Total)} / ${fmt(paycheck)}</span>
+            </div>
+
+            <div style="margin-top:14px"></div>
+            <div class="period-header">Paycheck 2 — Bills due 16th–31st</div>
+            ${p2Bills.map(b=>`<div class="planner-row">
+              <span class="planner-row-name">${b.name}</span>
+              <span style="font-size:11px;color:var(--muted);margin-right:6px">${ord(Array.isArray(b.dueDay)?b.dueDay[0]:b.dueDay)}</span>
+              <span class="planner-row-amt">${fmt(b.amount)}</span>
+            </div>`).join('')}
+            ${noDueBills.length ? `<div style="font-size:11px;color:var(--muted);padding:4px 0">${noDueBills.map(b=>b.name).join(', ')} — no fixed date</div>` : ''}
+            <div class="period-total">
+              <span>Total</span>
+              <span class="${p2Total>paycheck?'c-red':'c-green'}">${fmt(p2Total)} / ${fmt(paycheck)}</span>
+            </div>
+
+            ${levers.length ? `<div style="margin-top:14px">
+              <div class="planner-card-title" style="margin-bottom:6px">🔧 Cost-Cutting Levers</div>
+              ${levers.map(b=>`<div class="lever-row">
+                <span class="lever-name">${b.name}</span>
+                <button class="btn" style="font-size:10px;padding:2px 8px" onclick="event.stopPropagation();openModal('${b.id}')">Edit</button>
+                <span class="lever-amt" style="margin-left:8px">${fmt(b.amount)}</span>
+              </div>`).join('')}
+            </div>` : ''}
+          </div>
+
+        </div>
+      </div>
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════
 // RENDER
 // ════════════════════════════════════════════════════
 
@@ -680,7 +1107,9 @@ function render() {
   renderStats();
   renderUpcoming();
   renderBillSections();
-  renderAccounts();
+  renderAccountsV2();
+  renderCalendar();
+  renderBudgetPlanner();
   renderSummary();
 }
 
@@ -875,26 +1304,166 @@ function billRow(b) {
     </div>`;
 }
 
-function renderAccounts() {
-  document.getElementById('accounts-grid').innerHTML = ACCOUNTS.map(a => {
-    if (a.type === 'cc') {
-      const pct = Math.min(Math.round(a.used/a.limit*100),100);
-      const cls = a.available<0 ? 'c-red' : a.available<100 ? 'c-orange' : 'c-green';
-      const bar = a.available<0 ? 'var(--red)' : a.available<100 ? 'var(--orange)' : 'var(--green)';
-      return `<div class="acc-card">
-        <div class="acc-name">💳 ${a.name}</div>
-        <div class="acc-balance ${cls}">${fmt(a.available)} avail</div>
-        <div class="acc-sub">${fmt(a.used)} of ${fmt(a.limit)} used</div>
-        <div class="progress-bar" style="margin-top:5px"><div class="progress-fill" style="width:${pct}%;background:${bar}"></div></div>
-      </div>`;
-    }
-    const icons = { checking:'🏛️', savings:'🏦', cash:'💵', crypto:'₿' };
-    const cls   = a.balance>=500 ? 'c-green' : a.balance>0 ? '' : 'c-red';
-    return `<div class="acc-card">
-      <div class="acc-name">${icons[a.type]||'💰'} ${a.name}</div>
-      <div class="acc-balance ${cls}">${fmt(a.balance)}</div>
-    </div>`;
-  }).join('');
+// ── ACCOUNT MODAL ──────────────────────────────────────────
+let currentAcctId = null;
+
+function openAcctModal(id) {
+  currentAcctId = id;
+  const a = id ? ACCTS.find(x => x.id === id) : null;
+  document.getElementById('acct-modal-title').textContent = a ? 'Edit — ' + a.name : 'Add Account';
+  document.getElementById('af-delete-btn').style.display = a ? '' : 'none';
+  document.getElementById('af-name').value    = a ? a.name  : '';
+  document.getElementById('af-type').value    = a ? a.type  : 'checking';
+  document.getElementById('af-balance').value = a && a.balance != null ? a.balance : '';
+  document.getElementById('af-limit').value   = a ? (a.limit || '') : '';
+  document.getElementById('af-used').value    = a ? (a.used  || '') : '';
+  document.getElementById('af-loan-bal').value= a && a.type==='loan' ? a.balance : '';
+  updateAcctModalFields();
+  document.getElementById('acct-modal').classList.add('open');
+  document.getElementById('af-name').focus();
+}
+
+function updateAcctModalFields() {
+  const t = document.getElementById('af-type').value;
+  document.getElementById('af-cc-fields').style.display    = t==='cc'   ? '' : 'none';
+  document.getElementById('af-loan-field').style.display   = t==='loan' ? '' : 'none';
+  document.getElementById('af-balance-field').style.display= (t==='cc'||t==='loan') ? 'none' : '';
+}
+
+function closeAcctModal() {
+  document.getElementById('acct-modal').classList.remove('open');
+  currentAcctId = null;
+}
+
+function saveAccount() {
+  const name = document.getElementById('af-name').value.trim();
+  const type = document.getElementById('af-type').value;
+  if (!name) { document.getElementById('af-name').focus(); return; }
+
+  let acct = { name, type };
+  if (type === 'cc') {
+    acct.limit   = parseFloat(document.getElementById('af-limit').value) || 0;
+    acct.used    = parseFloat(document.getElementById('af-used').value)  || 0;
+  } else if (type === 'loan') {
+    acct.balance = parseFloat(document.getElementById('af-loan-bal').value) || 0;
+  } else {
+    acct.balance = parseFloat(document.getElementById('af-balance').value) || 0;
+  }
+
+  if (currentAcctId) {
+    const idx = ACCTS.findIndex(x => x.id === currentAcctId);
+    if (idx !== -1) ACCTS[idx] = { ...ACCTS[idx], ...acct };
+    toast('✅ Account updated — ' + name);
+  } else {
+    acct.id = 'acct_' + Date.now();
+    ACCTS.push(acct);
+    toast('✅ Account added — ' + name);
+  }
+  saveAccounts(); closeAcctModal(); render();
+}
+
+function deleteAccount() {
+  if (!currentAcctId) return;
+  const a = ACCTS.find(x => x.id === currentAcctId);
+  if (!confirm(`Delete "${a ? a.name : 'this account'}"?`)) return;
+  ACCTS = ACCTS.filter(x => x.id !== currentAcctId);
+  saveAccounts(); closeAcctModal(); render();
+  toast('🗑 Account deleted');
+}
+
+document.getElementById('acct-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('acct-modal')) closeAcctModal();
+});
+
+// ── RENDER ACCOUNTS V2 ──────────────────────────────────────
+function renderAccountsV2() {
+  const now = new Date();
+  const ts  = getAcctLastUpdated();
+  const tsLabel = ts ? new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'never';
+
+  const GROUPS = [
+    { key:'liquid',  label:'Cash & Checking', icon:'🏛️', types:['checking','cash'] },
+    { key:'savings', label:'Savings',          icon:'🏦', types:['savings'] },
+    { key:'invest',  label:'Investments',      icon:'📈', types:['investment','crypto'] },
+    { key:'cc',      label:'Credit Cards',     icon:'💳', types:['cc'] },
+    { key:'loans',   label:'Loans & Debt',     icon:'🔴', types:['loan'] },
+  ];
+
+  // Net worth calcs
+  const liqAmt  = ACCTS.filter(a=>['checking','cash','savings'].includes(a.type)).reduce((s,a)=>s+(a.balance||0),0);
+  const invAmt  = ACCTS.filter(a=>['investment','crypto'].includes(a.type)).reduce((s,a)=>s+(a.balance||0),0);
+  const ccDebt  = ACCTS.filter(a=>a.type==='cc').reduce((s,a)=>s+(a.used||0),0);
+  const lnDebt  = ACCTS.filter(a=>a.type==='loan').reduce((s,a)=>s+(a.balance||0),0);
+  const totDebt = ccDebt + lnDebt;
+  const netWorth= liqAmt + invAmt - totDebt;
+  const unpaid  = DATA.filter(b=>b.cat!=='INCOME'&&getStatus(b.id)!=='hold'&&getStatus(b.id)!=='paid').reduce((s,b)=>s+b.amount,0);
+  const safe    = liqAmt - unpaid;
+
+  const nwCards = [
+    { label:'Liquid Cash',     val:liqAmt,  cls:liqAmt>2000?'c-green':'c-orange', prefix:'+' },
+    { label:'Investments',     val:invAmt,  cls:'c-blue', prefix:'+' },
+    { label:'Total Debt',      val:totDebt, cls:'c-red',  prefix:'−' },
+    { label:'Net Worth',       val:netWorth,cls:netWorth>=0?'c-green':'c-red', prefix: netWorth>=0?'+':'−' },
+    { label:'Safe to Spend',   val:safe,    cls:safe>=0?'c-green':'c-red', prefix: safe>=0?'':'−',
+      sub: 'after unpaid bills' },
+  ];
+
+  let html = `<div class="section">
+    <div class="sec-header" onclick="toggleSection('accounts')">
+      <div class="sec-title">🏦 Accounts & Net Worth <span class="sec-badge">Updated: ${tsLabel}</span></div>
+      <div class="sec-right">
+        ${editMode ? `<button class="btn" style="font-size:11px;padding:4px 10px" onclick="event.stopPropagation();openAcctModal(null)">＋ Add</button>` : ''}
+        <span class="chevron ${collapsed['accounts']?'':'open'}" id="chev-accounts">▼</span>
+      </div>
+    </div>
+    <div class="sec-body ${collapsed['accounts']?'collapsed':''}" id="body-accounts">
+      <div class="nw-grid">
+        ${nwCards.map(c=>`<div class="stat-card">
+          <div class="stat-label">${c.label}</div>
+          <div class="stat-value ${c.cls}">${c.prefix!=='−'?'':c.prefix}${fmt(Math.abs(c.val))}</div>
+          ${c.sub ? `<div class="stat-sub">${c.sub}</div>` : ''}
+        </div>`).join('')}
+      </div>
+      ${GROUPS.map(g => {
+        const accts = ACCTS.filter(a => g.types.includes(a.type));
+        if (!accts.length) return '';
+        return `<div class="acct-group-title">${g.icon} ${g.label}</div>` +
+          accts.map(a => {
+            if (a.type === 'cc') {
+              const avail = (a.limit||0) - (a.used||0);
+              const pct   = Math.min(Math.round((a.used||0)/(a.limit||1)*100),100);
+              const cls   = avail < 0 ? 'c-red' : avail < 100 ? 'c-orange' : 'c-green';
+              const bar   = avail < 0 ? 'var(--red)' : avail < 100 ? 'var(--orange)' : 'var(--green)';
+              return `<div class="acct-row">
+                <div class="acct-row-name">${a.name}</div>
+                <div class="acct-row-sub">${fmt(a.used||0)} / ${fmt(a.limit||0)}</div>
+                <div class="acct-row-bal ${cls}">${fmt(avail)} avail</div>
+                ${editMode ? `<span class="edit-icon" onclick="openAcctModal('${a.id}')">✏️</span>` : ''}
+              </div>
+              <div style="padding:0 15px 6px">
+                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${bar}"></div></div>
+              </div>`;
+            }
+            if (a.type === 'loan') {
+              return `<div class="acct-row">
+                <div class="acct-row-name">${a.name}</div>
+                <div class="acct-row-sub">amount owed</div>
+                <div class="acct-row-bal c-red">−${fmt(a.balance||0)}</div>
+                ${editMode ? `<span class="edit-icon" onclick="openAcctModal('${a.id}')">✏️</span>` : ''}
+              </div>`;
+            }
+            const cls = (a.balance||0) >= 500 ? 'c-green' : (a.balance||0) > 0 ? '' : 'c-red';
+            return `<div class="acct-row">
+              <div class="acct-row-name">${a.name}</div>
+              <div class="acct-row-bal ${cls}">${fmt(a.balance||0)}</div>
+              ${editMode ? `<span class="edit-icon" onclick="openAcctModal('${a.id}')">✏️</span>` : ''}
+            </div>`;
+          }).join('');
+      }).join('')}
+    </div>
+  </div>`;
+
+  document.getElementById('accounts-v2').innerHTML = html;
 }
 
 function renderSummary() {
