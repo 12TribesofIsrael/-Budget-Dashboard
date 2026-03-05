@@ -152,6 +152,7 @@
     .badge-due    { background: var(--red-bg);      color: var(--red);    border: 1px solid rgba(248,81,73,.4); }
     .badge-hold   { background: var(--gray-bg);     color: var(--gray);   border: 1px solid var(--border); cursor: default; }
     .badge-income { background: rgba(63,185,80,.1); color: var(--green);  border: 1px solid rgba(63,185,80,.2); cursor: default; }
+    .badge-auto   { background: var(--blue-bg);     color: var(--blue);   border: 1px solid rgba(88,166,255,.35); }
 
     /* ── UPCOMING ── */
     .upcoming-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 10px; padding: 13px; }
@@ -408,6 +409,7 @@
         <select id="f-status">
           <option value="due">! DUE — needs to be paid this month</option>
           <option value="paid">✓ PAID — confirmed done</option>
+          <option value="auto">🔄 AUTOPAY — deducted automatically</option>
           <option value="hold">⏸ ON HOLD — inactive / paused</option>
         </select>
       </div>
@@ -797,12 +799,16 @@ function toggleStatus(id) {
   if (editMode) { openModal(id); return; }
   const bill = DATA.find(b => b.id === id);
   if (!bill || getStatus(id) === 'hold') return;
-  if (getStatus(id) === 'due') {
+  const s = getStatus(id);
+  if (s === 'due') {
     state[id] = 'paid';
     toast('✅ Marked paid — ' + bill.name);
-  } else {
+  } else if (s === 'paid') {
     state[id] = 'due';
     toast('↩ Unmarked — ' + bill.name);
+  } else if (s === 'auto') {
+    state[id] = 'paid';
+    toast('✅ Autopay confirmed — ' + bill.name);
   }
   saveState(); render();
 }
@@ -1141,7 +1147,7 @@ function renderAlerts() {
   const today = new Date().getDate();
   const overdue = DATA.filter(b => {
     if (b.cat === 'INCOME') return false;
-    if (getStatus(b.id) !== 'due') return false;
+    const s = getStatus(b.id); if (s !== 'due') return false;
     if (!b.dueDay || b.dueDay === 'biweekly' || Array.isArray(b.dueDay)) return false;
     return b.dueDay < today;
   });
@@ -1160,7 +1166,7 @@ function renderAlerts() {
 function renderStats() {
   const expenses = DATA.filter(b => b.cat !== 'INCOME');
   const active   = expenses.filter(b => getStatus(b.id) !== 'hold');
-  const paid     = active.filter(b => getStatus(b.id) === 'paid');
+  const paid     = active.filter(b => getStatus(b.id) === 'paid' || getStatus(b.id) === 'auto');
   const paidAmt  = paid.reduce((s,b) => s+b.amount, 0);
   const totalAmt = active.reduce((s,b) => s+b.amount, 0);
   const pct = active.length ? Math.round(paid.length/active.length*100) : 0;
@@ -1218,8 +1224,9 @@ function renderUpcoming() {
 
 function badge(id) {
   const s = getStatus(id);
-  if (s === 'paid') return `<span class="badge badge-paid locked" onclick="event.stopPropagation();toggleStatus('${id}')">✓ PAID</span>`;
-  if (s === 'due')  return `<span class="badge badge-due"          onclick="event.stopPropagation();toggleStatus('${id}')">! DUE</span>`;
+  if (s === 'paid') return `<span class="badge badge-paid locked" onclick="event.stopPropagation();toggleStatus('${id}')" title="Click to unmark">✓ PAID</span>`;
+  if (s === 'due')  return `<span class="badge badge-due"          onclick="event.stopPropagation();toggleStatus('${id}')" title="Click to mark paid">! DUE</span>`;
+  if (s === 'auto') return `<span class="badge badge-auto"         onclick="event.stopPropagation();toggleStatus('${id}')" title="Autopay — click to confirm received">🔄 AUTOPAY</span>`;
   return `<span class="badge badge-hold locked">⏸ ON HOLD</span>`;
 }
 
@@ -1236,7 +1243,7 @@ function renderBillSections() {
 
     const icon     = CAT_ICONS[cat] || '📋';
     const active   = bills.filter(b => getStatus(b.id) !== 'hold');
-    const paid     = active.filter(b => getStatus(b.id) === 'paid');
+    const paid     = active.filter(b => getStatus(b.id) === 'paid' || getStatus(b.id) === 'auto');
     const totalAmt = active.reduce((s,b) => s+b.amount, 0);
     const col      = !!collapsed[cat];
 
