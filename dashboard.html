@@ -1121,20 +1121,21 @@ function renderHeader() {
 function renderAlerts() {
   const cards = [];
 
-  ACCOUNTS.filter(a => a.type==='cc' && a.available < 0).forEach(a => {
-    cards.push(`<div class="alert-card">
-      <div class="alert-label">🚨 Over Credit Limit</div>
-      <div class="alert-body">${a.name}</div>
-      <div class="alert-sub">Over by ${fmt(Math.abs(a.available))} &nbsp;·&nbsp; Limit ${fmt(a.limit)}</div>
-    </div>`);
-  });
-
-  ACCOUNTS.filter(a => a.type==='cc' && a.available >= 0 && a.available < 100).forEach(a => {
-    cards.push(`<div class="alert-card warn">
-      <div class="alert-label">⚠️ Near Credit Limit</div>
-      <div class="alert-body">${a.name}</div>
-      <div class="alert-sub">Only ${fmt(a.available)} left &nbsp;·&nbsp; Limit ${fmt(a.limit)}</div>
-    </div>`);
+  ACCTS.filter(a => a.type==='cc').forEach(a => {
+    const avail = (a.limit||0) - (a.used||0);
+    if (avail < 0) {
+      cards.push(`<div class="alert-card">
+        <div class="alert-label">🚨 Over Credit Limit</div>
+        <div class="alert-body">${a.name}</div>
+        <div class="alert-sub">Over by ${fmt(Math.abs(avail))} &nbsp;·&nbsp; Limit ${fmt(a.limit)}</div>
+      </div>`);
+    } else if (avail < 100) {
+      cards.push(`<div class="alert-card warn">
+        <div class="alert-label">⚠️ Near Credit Limit</div>
+        <div class="alert-body">${a.name}</div>
+        <div class="alert-sub">Only ${fmt(avail)} left &nbsp;·&nbsp; Limit ${fmt(a.limit)}</div>
+      </div>`);
+    }
   });
 
   const today = new Date().getDate();
