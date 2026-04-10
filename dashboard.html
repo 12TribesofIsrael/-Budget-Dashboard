@@ -322,6 +322,9 @@
     <span class="header-month" id="header-month"></span>
   </div>
   <div class="header-right">
+    <button class="btn" onclick="exportData()">⬇ Export</button>
+    <button class="btn" onclick="document.getElementById('import-file').click()">⬆ Import</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
     <button class="btn" onclick="toggleInactive()" id="btn-inactive">Show Inactive</button>
     <button class="btn" id="btn-edit" onclick="toggleEditMode()">✏️ Edit</button>
     <button class="btn btn-danger" onclick="resetMonth()">↺ Reset Month</button>
@@ -1541,6 +1544,49 @@ function renderSummary() {
   }
   localStorage.setItem('budget_last_key', curKey);
 })();
+
+// ════════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ════════════════════════════════════════════════════
+
+function exportData() {
+  const backup = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('budget_')) {
+      backup[key] = localStorage.getItem(key);
+    }
+  }
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const d = new Date();
+  a.download = `budget-backup-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Backup exported ✓');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const backup = JSON.parse(e.target.result);
+      const keys = Object.keys(backup).filter(k => k.startsWith('budget_'));
+      if (keys.length === 0) { alert('No budget data found in this file.'); return; }
+      if (!confirm(`Restore ${keys.length} saved items? This will overwrite your current data.`)) return;
+      keys.forEach(k => localStorage.setItem(k, backup[k]));
+      location.reload();
+    } catch(err) {
+      alert('Invalid backup file.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
 
 render();
 </script>
