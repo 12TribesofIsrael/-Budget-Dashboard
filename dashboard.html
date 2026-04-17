@@ -48,6 +48,7 @@
     .header-left { display: flex; align-items: center; gap: 10px; }
     .header-title { font-size: 17px; font-weight: 700; }
     .header-month { font-size: 13px; color: var(--muted); }
+    .header-saved { font-size: 12px; color: var(--orange); background: var(--orange-bg); padding: 2px 8px; border-radius: 6px; }
     .header-right { display: flex; gap: 8px; align-items: center; }
 
     .btn {
@@ -320,6 +321,7 @@
   <div class="header-left">
     <span class="header-title">💰 Budget Dashboard</span>
     <span class="header-month" id="header-month"></span>
+    <span class="header-saved" id="last-saved"></span>
   </div>
   <div class="header-right">
     <button class="btn" onclick="exportData()">⬇ Export</button>
@@ -595,6 +597,7 @@ function loadAccounts() {
 }
 function saveAccounts() {
   localStorage.setItem('budget_accounts_v3', JSON.stringify({ lastUpdated: Date.now(), accounts: ACCTS }));
+  logSaveTimestamp();
 }
 function getAcctLastUpdated() {
   try { const v = localStorage.getItem('budget_accounts_v3'); if(v) { const p=JSON.parse(v); return p.lastUpdated||null; } } catch(e){}
@@ -619,6 +622,7 @@ function loadData() {
 
 function saveData() {
   localStorage.setItem('budget_bills_v3', JSON.stringify(DATA));
+  logSaveTimestamp();
 }
 
 let DATA = loadData();
@@ -637,7 +641,23 @@ function loadState() {
   return {};
 }
 
-function saveState() { localStorage.setItem(monthKey(), JSON.stringify(state)); }
+function saveState() { localStorage.setItem(monthKey(), JSON.stringify(state)); logSaveTimestamp(); }
+
+function logSaveTimestamp() {
+  const now = new Date();
+  const ts = now.toLocaleString();
+  localStorage.setItem('budget_last_saved', now.toISOString());
+  const el = document.getElementById('last-saved');
+  if (el) el.textContent = '💾 Last saved: ' + ts;
+}
+
+function loadLastSaved() {
+  const el = document.getElementById('last-saved');
+  if (!el) return;
+  const iso = localStorage.getItem('budget_last_saved');
+  if (!iso) { el.textContent = '⏳ No saves yet'; return; }
+  el.textContent = '💾 Last saved: ' + new Date(iso).toLocaleString();
+}
 
 function getStatus(id) {
   if (state[id] !== undefined) return state[id];
@@ -1589,6 +1609,7 @@ function importData(event) {
 }
 
 render();
+loadLastSaved();
 </script>
 </body>
 </html>
