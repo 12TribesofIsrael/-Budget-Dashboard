@@ -324,6 +324,7 @@
     <span class="header-saved" id="last-saved"></span>
   </div>
   <div class="header-right">
+    <select class="btn" id="month-picker" onchange="switchMonth(this.value)" title="View a past month" style="cursor:pointer"></select>
     <button class="btn" onclick="exportData()">⬇ Export</button>
     <button class="btn" onclick="document.getElementById('import-file').click()">⬆ Import</button>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
@@ -335,6 +336,7 @@
 
 <!-- ═══ MAIN ═══ -->
 <div class="main">
+  <div id="view-banner"></div>
   <div id="alerts"></div>
   <div class="stats-row" id="stats-row"></div>
 
@@ -631,9 +633,20 @@ let DATA = loadData();
 // MONTHLY STATUS STATE
 // ════════════════════════════════════════════════════
 
+let VIEW_DATE = new Date();   // the month currently being viewed (defaults to today)
+
 function monthKey() {
+  const d = VIEW_DATE;
+  return `budget_state_v2_${d.getFullYear()}_${d.getMonth()+1}`;
+}
+
+function currentMonthKey() {
   const d = new Date();
   return `budget_state_v2_${d.getFullYear()}_${d.getMonth()+1}`;
+}
+
+function isViewingCurrentMonth() {
+  return monthKey() === currentMonthKey();
 }
 
 function loadState() {
@@ -837,7 +850,7 @@ function toggleStatus(id) {
 }
 
 function resetMonth() {
-  const label = new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const label = VIEW_DATE.toLocaleDateString('en-US',{month:'long',year:'numeric'});
   if (!confirm(`Reset all statuses for ${label}?\n\nEverything will go back to DUE.`)) return;
   state = {};
   saveState(); render();
@@ -892,10 +905,12 @@ function getPaycheckDays(year, month) {
 }
 
 function renderCalendar() {
-  const now     = new Date();
+  const now     = VIEW_DATE;
+  const real    = new Date();
   const year    = now.getFullYear();
   const month   = now.getMonth();
-  const today   = now.getDate();
+  const viewingCurrent = (year === real.getFullYear() && month === real.getMonth());
+  const today   = viewingCurrent ? real.getDate() : -1;  // -1 = don't highlight any day
   const anchor  = localStorage.getItem('budget_paycheck_anchor') || '';
   const monthLabel = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
 
@@ -1158,8 +1173,70 @@ function render() {
 }
 
 function renderHeader() {
-  const label = new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const label = VIEW_DATE.toLocaleDateString('en-US',{month:'long',year:'numeric'});
   document.getElementById('header-month').textContent = '· ' + label;
+  renderMonthPicker();
+  renderViewBanner();
+}
+
+// ────────────────────────────────────────────────────
+// MONTH PICKER + PAST-MONTH VIEWING
+// ────────────────────────────────────────────────────
+
+function monthLabelFromKey(k) {
+  const m = k.match(/_(\d+)_(\d+)$/);
+  if (!m) return k;
+  return new Date(+m[1], +m[2]-1, 1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+}
+
+function listSavedMonths() {
+  const set = new Set();
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('budget_state_v2_')) set.add(k);
+  }
+  set.add(currentMonthKey());  // always offer the current month
+  set.add(monthKey());         // and whatever's being viewed
+  return [...set].sort((a,b) => {
+    const pa = a.match(/_(\d+)_(\d+)$/), pb = b.match(/_(\d+)_(\d+)$/);
+    const va = pa ? (+pa[1])*12 + (+pa[2]) : 0;
+    const vb = pb ? (+pb[1])*12 + (+pb[2]) : 0;
+    return vb - va;  // newest first
+  });
+}
+
+function renderMonthPicker() {
+  const sel = document.getElementById('month-picker');
+  if (!sel) return;
+  const cur = monthKey();
+  sel.innerHTML = listSavedMonths().map(k =>
+    `<option value="${k}"${k===cur?' selected':''}>${monthLabelFromKey(k)}${k===currentMonthKey()?' (current)':''}</option>`
+  ).join('');
+}
+
+function switchMonth(key) {
+  const m = key.match(/_(\d+)_(\d+)$/);
+  if (!m) return;
+  VIEW_DATE = new Date(+m[1], +m[2]-1, 1);
+  state = loadState();
+  render();
+  if (!isViewingCurrentMonth()) toast('📅 Viewing ' + monthLabelFromKey(key));
+}
+
+function goToCurrentMonth() {
+  VIEW_DATE = new Date();
+  state = loadState();
+  render();
+}
+
+function renderViewBanner() {
+  const el = document.getElementById('view-banner');
+  if (!el) return;
+  if (isViewingCurrentMonth()) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div style="margin:10px 0;padding:10px 14px;background:#3a2e12;border:1px solid #6b551f;border-radius:8px;color:#f2d98a;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    📅 You're viewing <strong>${monthLabelFromKey(monthKey())}</strong> — a past month. Any changes edit that month only.
+    <button class="btn" onclick="goToCurrentMonth()" style="margin-left:auto">↩ Back to current month</button>
+  </div>`;
 }
 
 function renderAlerts() {
