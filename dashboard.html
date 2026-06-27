@@ -554,6 +554,8 @@ const DEFAULT_ACCOUNTS = [
   { id:'square',        name:'Square Checking',        type:'checking',   balance:9.75 },
   { id:'penfed_chk',    name:'PenFed Checking',        type:'checking',   balance:69.75 },
   { id:'langley_chk',   name:'Langley Checking',       type:'checking',   balance:60 },
+  { id:'citizens_chk',  name:'Citizens Checking',      type:'checking',   balance:0 },
+  { id:'chase_chk',     name:'Chase Checking',         type:'checking',   balance:0 },
   { id:'navyfed_5366',  name:'Navy Federal (5366)',    type:'checking',   balance:18.69 },
   { id:'navyfed_3890',  name:'Navy Federal (3890)',    type:'checking',   balance:13.60 },
   { id:'delone_chk',    name:'Del-One Checking',       type:'checking',   balance:18 },
@@ -565,6 +567,7 @@ const DEFAULT_ACCOUNTS = [
   { id:'truist_mma',    name:'Truist MMA',             type:'savings',    balance:3.39 },
   { id:'nihfcu_sav',    name:'NIHFCU Savings',         type:'savings',    balance:4.32 },
   { id:'langley_sav',   name:'Langley Savings',        type:'savings',    balance:11.22 },
+  { id:'citizens_sav',  name:'Citizens Savings',       type:'savings',    balance:0 },
   { id:'penfed_sav',    name:'PenFed Savings',         type:'savings',    balance:5 },
   { id:'delone_sav',    name:'Del-One Savings',        type:'savings',    balance:0.69 },
   // ── INVESTMENTS ──────────────────────────────────────
@@ -593,7 +596,14 @@ const DEFAULT_ACCOUNTS = [
 function loadAccounts() {
   try {
     const v = localStorage.getItem('budget_accounts_v3');
-    if (v) { const p = JSON.parse(v); return p.accounts || p; }
+    if (v) {
+      const p = JSON.parse(v);
+      const stored = p.accounts || p;
+      // Merge in any new default accounts not yet saved (by id), keeping saved balances.
+      const ids = new Set(stored.map(a => a.id));
+      DEFAULT_ACCOUNTS.forEach(d => { if (!ids.has(d.id)) stored.push(JSON.parse(JSON.stringify(d))); });
+      return stored;
+    }
   } catch(e) {}
   return JSON.parse(JSON.stringify(DEFAULT_ACCOUNTS));
 }
